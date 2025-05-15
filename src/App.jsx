@@ -10,6 +10,7 @@ const App = () => {
     "Display",
     "Mobile",
     "Projector",
+    "Lights",
   ];
   const [cart, setCart] = useState([]);
   const [selectedProduct, setselectedProduct] = useState("");
