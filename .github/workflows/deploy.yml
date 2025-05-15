@@ -4,7 +4,7 @@ name: Deploy to Github Pages
 #on defines WHEN the action(s) will run
 on: 
     push: 
-        branches: [main]
+        branches: [master]
     workflow_dispatch: 
 
 #permissions grant our image runner the ability to read/write files
