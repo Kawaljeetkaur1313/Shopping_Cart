@@ -1,0 +1,63 @@
+#name of our overall action
+name: Deploy to Github Pages
+
+#on defines WHEN the action(s) will run
+on: 
+    push: 
+        branches: [main]
+    workflow_dispatch: 
+
+#permissions grant our image runner the ability to read/write files
+permissions: 
+    contents: read
+    pages: write
+    id-token: write
+
+#2 commits made to main , this will cancel the first , and onnly run the second 
+concurrency: 
+    group: "pages"
+    cancel-in-progress: true
+
+#jobs defines WHAT action(s) will run
+jobs:
+    #name of the job,this can be anything you want
+    build: 
+        #each job is executed on an image,in this case ubuntu-22.04
+        runs-on: ubuntu-22.04
+        #steps are essential tasks
+        steps: 
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+              #each step has a name , and either a command (like run) or
+              # leverage an existing pre-made step like pnpm/action-setup
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: "18"
+                cache: "npm"
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Build Application
+              run: npm run build
+              
+            - name: Upload Build Artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                path: ./dist
+                #an artifact prepares your static files for GH pages deployment
+                # and make them avaiable forr the next job
+    deploy: 
+        environment: 
+            name: github-pages
+            url: ${{steps.deployment.outputs.page_url}}
+            #if builds fails, deploy will not run...  hence it "needs" build
+        needs: build
+        runs-on: ubuntu-22.04
+        #each job must have a runs-on 
+        steps: 
+            - name: Deploy to Github Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
